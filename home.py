@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime, date
+from zoneinfo import ZoneInfo
 import os
 
 from monster_master import MONSTER_MASTER
@@ -367,7 +368,7 @@ def save_evolution_state(month, monster_type, monster_id):
         "月": [month],
         "monster_type": [monster_type],
         "monster_id": [monster_id],
-        "保存日時": [datetime.now()],
+        "保存日時": [datetime.now(ZoneInfo("Asia/Tokyo"))],
     }
 
     df = pd.DataFrame(data)
@@ -420,7 +421,7 @@ def save_game_state(active_month, pending_result_month=None):
     data = {
         "active_month": [active_month],
         "pending_result_month": [pending_result_month],
-        "保存日時": [datetime.now()],
+        "保存日時": [datetime.now(ZoneInfo("Asia/Tokyo"))],
     }
 
     df = pd.DataFrame(data)
@@ -435,7 +436,7 @@ def register_monster_to_dex(month, evolution, monster_type, monster_id):
         return
 
     new_data = {
-        "初登録日時": [datetime.now()],
+        "初登録日時": [datetime.now(ZoneInfo("Asia/Tokyo"))],
         "初登録月": [month],
         "進化段階": [evolution],
         "monster_type": [monster_type],
@@ -952,7 +953,7 @@ if save_button:
         before_monster_id = None
 
     data = {
-        "保存日時": [datetime.now()],
+        "保存日時": [datetime.now(ZoneInfo("Asia/Tokyo"))],
         "日付": [record_date.strftime("%Y-%m-%d")],
         "月": [record_month],
         "損益%": [profit_percent],

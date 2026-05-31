@@ -49,7 +49,7 @@ def save_game_state(active_month, pending_result_month=None):
     data = {
         "active_month": [active_month],
         "pending_result_month": [pending_result_month],
-        "保存日時": [datetime.now()],
+        "保存日時": [datetime.now(ZoneInfo("Asia/Tokyo"))],
     }
 
     df = pd.DataFrame(data)
@@ -60,7 +60,7 @@ def reset_evolution_state_for_new_month(new_month):
         "月": [new_month],
         "monster_type": [None],
         "monster_id": [None],
-        "保存日時": [datetime.now()],
+        "保存日時": [datetime.now(ZoneInfo("Asia/Tokyo"))],
     }
 
     df = pd.DataFrame(data)
