@@ -1,0 +1,77 @@
+ULTIMATE_EVOLUTION = {
+
+    # Attacker
+    "GRANDRAKE": "ZAGROS",
+    "ABYSS_SERPENT": "LEVIATAN",
+    "SKYVERN": "VALZEON",
+
+    "INFERNOS": "BLAZEREX",
+    "IRONZAUR": "FORTZAUR",
+    "BERSAGON": "RAGEGRAUL",
+
+    # Sage
+    "LUMIFEA": "LUMINARIA",
+    "MYSTIA": "MISTINA",
+    "VERLINA": "VERIS",
+
+    "ARKEIN": "ARCANUS",
+    "NOXIS": "NACTIS",
+    "LOGWELL": "LOGION",
+
+    # Gardian
+    "SILVARD": "SEIREA",
+    "CELESTIA": "AQUARION",
+    "VALGAS": "VALDION",
+
+    "LEAFELD": "LEAFFORT",
+    "IRONSHELL": "IRONFORT",
+    "ALMAZIO": "GAIAROCK",
+
+    # Chaos
+    "LEOGALG": "BALGULEO",
+    "VOLGALD": "VOLTIGA",
+    "NEVALK": "NELGROM",
+
+    "RURUMESOM": "NANPINKING",
+    "SUYASLIN": "FUKUMILORD",
+    "POLTURN": "INAGOPRINCE",
+}
+
+MEGA_EVOLUTION = {
+
+    # Attacker
+    "ZAGROS": "GAIARD",
+    "LEVIATAN": "OCEANUS",
+    "VALZEON": "ASTRAL",
+
+    "BLAZEREX": "IGNIX",
+    "FORTZAUR": "METALGALD",
+    "RAGEGRAUL": "DEMONIRAL",
+
+    # Sage
+    "LUMINARIA": "ASTREA",
+    "MISTINA": "AQUERIS",
+    "VERIS": "SYLPHIA",
+
+    "ARCANUS": "ENFERDIAS",
+    "NACTIS": "ECLIPSION",
+    "LOGION": "ZEULION",
+
+    # Gardian
+    "AQUARION": "AQUARION-M",
+    "SEIREA": "SEIREA-M",
+    "VALDION": "GAIABASTION",
+
+    "LEAFFORT": "LEAFORDION",
+    "IRONFORT": "GORGONGALD",
+    "GAIAROCK": "ORIHALGAIA",
+
+    # Chaos
+    "BALGULEO": "LEOGKAISER",
+    "VOLTIGA": "VOLKRONOS",
+    "NELGROM": "NEBISREX",
+
+    "NANPINKING": "MELANTIA",
+    "FUKUMILORD": "POYAMEROS",
+    "INAGOPRINCE": "RIKACLEAR",
+}

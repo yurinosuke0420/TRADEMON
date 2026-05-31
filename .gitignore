@@ -1,0 +1,6 @@
+record.csv
+monster_dex.csv
+evolution_state.csv
+game_state.csv
+__pycache__/
+*.pyc

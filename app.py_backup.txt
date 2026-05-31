@@ -1,0 +1,600 @@
+import streamlit as st
+import pandas as pd
+from datetime import datetime, date
+import os
+
+from monster_master import MONSTER_MASTER
+
+st.title("株モンスター育成ゲーム")
+
+file_name = "record.csv"
+state_file_name = "evolution_state.csv"
+
+stages = ["闇タマゴ", "タマゴ", "幼体", "成長期", "成熟期", "完全体", "究極体"]
+
+CHAMPION_BRANCHES = {
+
+    "DRAL": {
+        "Defense": "GRANDRAKE",
+        "Intelligence": "ABYSS_SERPENT",
+        "Chaos": "SKYVERN",
+    },
+
+    "GARGANOS": {
+        "Defense": "INFERNOS",
+        "Intelligence": "IRONZAUR",
+        "Chaos": "BERSAGON",
+    },
+
+    "FAIRIS": {
+        "Defense": "LUMIFEA",
+        "Attack": "MYSTIA",
+        "Chaos": "VERLINA",
+    },
+
+    "SEIJAS": {
+        "Defense": "ARKEIN",
+        "Attack": "NOXIS",
+        "Chaos": "LOGWELL",
+    },
+
+    "RAGNITE": {
+        "Attack": "SILVARD",
+        "Intelligence": "CELESTIA",
+        "Chaos": "VALGAS",
+    },
+
+    "GARUSHELL": {
+        "Attack": "LEAFELD",
+        "Intelligence": "IRONSHELL",
+        "Chaos": "ALMAZIO",
+    },
+
+    "REIGAL": {
+        "Attack": "LEOGALG",
+        "Defense": "VOLGALD",
+        "Intelligence": "NEVALK",
+    },
+
+    "MELORIM": {
+        "Attack": "RURUMESOM",
+        "Defense": "SUYASLIN",
+        "Intelligence": "POLTURN",
+    }
+
+}
+
+ULTIMATE_EVOLUTION = {
+
+    # Attacker
+    "GRANDRAKE": "ZAGROS",
+    "ABYSS_SERPENT": "LEVIATAN",
+    "SKYVERN": "VALZEON",
+
+    "INFERNOS": "BLAZEREX",
+    "IRONZAUR": "FORTZAUR",
+    "BERSAGON": "RAGEGRAUL",
+
+    # Sage
+    "LUMIFEA": "LUMINARIA",
+    "MYSTIA": "MISTINA",
+    "VERLINA": "VERIS",
+
+    "ARKEIN": "ARCANUS",
+    "NOXIS": "NACTIS",
+    "LOGWELL": "LOGION",
+
+    # Gardian
+    "SILVARD": "SEIREA",
+    "CELESTIA": "AQUARION",
+    "VALGAS": "VALDION",
+
+    "LEAFELD": "LEAFFORT",
+    "IRONSHELL": "IRONFORT",
+    "ALMAZIO": "GAIAROCK",
+
+    # Chaos
+    "LEOGALG": "BALGULEO",
+    "VOLGALD": "VOLTIGA",
+    "NEVALK": "NELGROM",
+
+    "RURUMESOM": "NANPINKING",
+    "SUYASLIN": "FUKUMILORD",
+    "POLTURN": "INAGOPRINCE",
+}
+
+MEGA_EVOLUTION = {
+
+    # Attacker
+    "ZAGROS": "GAIARD",
+    "LEVIATAN": "OCEANUS",
+    "VALZEON": "ASTRAL",
+
+    "BLAZEREX": "IGNIX",
+    "FORTZAUR": "METALGALD",
+    "RAGEGRAUL": "DEMONIRAL",
+
+    # Sage
+    "LUMINARIA": "ASTREA",
+    "MISTINA": "AQUERIS",
+    "VERIS": "SYLPHIA",
+
+    "ARCANUS": "ENFERDIAS",
+    "NACTIS": "ECLIPSION",
+    "LOGION": "ZEULION",
+
+    # Gardian
+    "AQUARION": "AQUARION-M",
+    "SEIREA": "SEIREA-M",
+    "VALDION": "GAIABASTION",
+
+    "LEAFFORT": "LEAFORDION",
+    "IRONFORT": "GORGONGALD",
+    "GAIAROCK": "ORIHALGAIA",
+
+    # Chaos
+    "BALGULEO": "LEOGKAISER",
+    "VOLTIGA": "VOLKRONOS",
+    "NELGROM": "NEBISREX",
+
+    "NANPINKING": "MELANTIA",
+    "FUKUMILORD": "POYAMEROS",
+    "INAGOPRINCE": "RIKACLEAR",
+}
+
+def get_target_stage_index(month_exp):
+
+    if month_exp < 0:
+        return 0
+    elif month_exp < 30:
+        return 1
+    elif month_exp < 80:
+        return 2
+    elif month_exp < 150:
+        return 3
+    elif month_exp < 220:
+        return 4
+    elif month_exp < 300:
+        return 5
+    else:
+        return 6
+
+def get_next_target(stage_name):
+    targets = {
+        "闇タマゴ": 0,
+        "タマゴ": 30,
+        "幼体": 80,
+        "成長期": 150,
+        "成熟期": 220,
+        "完全体": 300,
+        "究極体": None,
+    }
+    return targets[stage_name]
+
+def load_evolution_state(month):
+    if not os.path.exists(state_file_name):
+        return None
+
+    state_df = pd.read_csv(state_file_name)
+
+    month_state = state_df[state_df["月"] == month]
+
+    if len(month_state) == 0:
+        return None
+
+    latest_state = month_state.iloc[-1]
+
+    return {
+        "monster_type": latest_state["monster_type"],
+        "monster_id": latest_state["monster_id"],
+    }
+
+
+def save_evolution_state(month, monster_type, monster_id):
+    data = {
+        "月": [month],
+        "monster_type": [monster_type],
+        "monster_id": [monster_id],
+        "保存日時": [datetime.now()],
+    }
+
+    df = pd.DataFrame(data)
+
+    if os.path.exists(state_file_name):
+        old_df = pd.read_csv(state_file_name)
+        old_df = old_df[old_df["月"] != month]
+        df = pd.concat([old_df, df], ignore_index=True)
+
+    df.to_csv(state_file_name, index=False)
+
+def clear_evolution_state(month):
+    if not os.path.exists(state_file_name):
+        return
+
+    state_df = pd.read_csv(state_file_name)
+    state_df = state_df[state_df["月"] != month]
+    state_df.to_csv(state_file_name, index=False)
+
+def get_dominant_type(attack, defense, intelligence, chaos):
+    stats = {
+        "Attacker": attack,
+        "Gardian": defense,
+        "Sage": intelligence,
+        "Chaos": chaos,
+    }
+    return max(stats, key=stats.get)
+
+def determine_rookie_monster(attack, defense, intelligence, chaos):
+
+    stats = {
+        "Attack": attack,
+        "Defense": defense,
+        "Intelligence": intelligence,
+        "Chaos": chaos,
+    }
+
+    sorted_stats = sorted(stats.items(), key=lambda x: x[1], reverse=True)
+
+    primary = sorted_stats[0][0]
+    secondary = sorted_stats[1][0]
+
+    # Attacker系
+    if primary == "Attack":
+
+        if secondary == "Defense":
+            return "GARGANOS"
+
+        else:
+            return "DRAL"
+
+    # Gardian系
+    elif primary == "Defense":
+
+        if secondary == "Intelligence":
+            return "GARUSHELL"
+
+        else:
+            return "RAGNITE"
+
+    # Sage系
+    elif primary == "Intelligence":
+
+        if secondary == "Attack":
+            return "SEIJAS"
+
+        else:
+            return "FAIRIS"
+
+    # Chaos系
+    elif primary == "Chaos":
+
+        if secondary == "Intelligence":
+            return "MELORIM"
+
+        else:
+            return "REIGAL"
+
+    return None
+
+
+def calculate_limited_evolution(month_data, save_state=True):
+    month_data = month_data.sort_values("日付")
+
+    month_exp = 0
+    current_stage_index = 1  # 毎月タマゴから開始
+    current_type = None
+    current_monster_id = None
+
+    current_month = month_data.iloc[0]["月"]
+    saved_state = load_evolution_state(current_month)
+
+    if saved_state is not None:
+        current_type = saved_state["monster_type"]
+        current_monster_id = saved_state["monster_id"]
+
+    total_attack = 0
+    total_defense = 0
+    total_intelligence = 0
+    total_chaos = 0
+
+    for _, row in month_data.iterrows():
+        month_exp += int(row["日次EXP"])
+
+        total_attack += int(row["攻撃力"])
+        total_defense += int(row["防御力"])
+        total_intelligence += int(row["知力"])
+        total_chaos += int(row["暴走度"])
+
+        target_stage_index = get_target_stage_index(month_exp)
+
+        if target_stage_index > current_stage_index:
+            current_stage_index += 1
+            new_stage = stages[current_stage_index]
+
+            if (
+                new_stage == "成長期"
+                and current_type is None
+                and current_monster_id is None
+            ):
+                current_type = get_dominant_type(
+                    total_attack,
+                    total_defense,
+                    total_intelligence,
+                    total_chaos
+                )
+
+                current_monster_id = determine_rookie_monster(
+                    total_attack,
+                    total_defense,
+                    total_intelligence,
+                    total_chaos
+                )
+
+                if save_state:
+                    save_evolution_state(
+                        row["月"],
+                        current_type,
+                        current_monster_id
+                    )
+
+            elif new_stage == "成熟期":
+                stats = {
+                    "Attack": total_attack,
+                    "Defense": total_defense,
+                    "Intelligence": total_intelligence,
+                    "Chaos": total_chaos,
+                }
+
+                if current_monster_id in CHAMPION_BRANCHES:
+                    branch_table = CHAMPION_BRANCHES[current_monster_id]
+
+                    available_stats = {
+                        stat_name: stats[stat_name]
+                        for stat_name in branch_table.keys()
+                    }
+
+                    selected_stat = max(available_stats, key=available_stats.get)
+                    current_monster_id = branch_table[selected_stat]
+
+            elif new_stage == "完全体":
+                if current_monster_id in ULTIMATE_EVOLUTION:
+                    current_monster_id = ULTIMATE_EVOLUTION[current_monster_id]
+
+            elif new_stage == "究極体":
+                if current_monster_id in MEGA_EVOLUTION:
+                    current_monster_id = MEGA_EVOLUTION[current_monster_id]
+
+        elif target_stage_index < current_stage_index:
+            current_stage_index -= 1
+
+            if current_stage_index < 3:
+                current_type = None
+                current_monster_id = None
+
+                if save_state:
+                    clear_evolution_state(row["月"])
+
+    total_stats = {
+        "攻撃力": total_attack,
+        "防御力": total_defense,
+        "知力": total_intelligence,
+        "暴走度": total_chaos,
+    }
+
+    return month_exp, stages[current_stage_index], current_type, current_monster_id, total_stats
+
+st.header("今日の記録")
+
+record_date = st.date_input("記録する日付", value=date.today())
+
+profit_percent = st.number_input("今日の損益（%）", value=0.0, step=0.1)
+
+good_trades = st.number_input("良トレード回数", value=0, step=1)
+good_quality = st.slider("良トレードの質（0〜5）", 0, 5, 0)
+
+bad_trades = st.number_input("無駄トレード回数", value=0, step=1)
+bad_weight = st.slider("無駄トレードの重さ（0〜5）", 0, 5, 0)
+
+memo = st.text_area("今日の振り返り")
+
+profit_exp = int(profit_percent * 10)
+good_trade_exp = good_trades * 5 + good_quality * 3
+bad_trade_penalty = bad_trades * -5 + bad_weight * -3
+
+if len(memo) >= 100:
+    memo_exp = 10
+elif len(memo) > 0:
+    memo_exp = 3
+else:
+    memo_exp = 0
+
+daily_exp = profit_exp + good_trade_exp + bad_trade_penalty + memo_exp
+
+attack = good_trades * 10 + good_quality * 5
+defense = max(
+    0,
+    10
+    + good_quality * 4
+    + memo_exp
+    - bad_trades * 8
+    - bad_weight * 3
+)
+intelligence = min(50, len(memo) // 4)
+chaos = bad_trades * 10 + bad_weight * 5
+
+st.header("今日の結果")
+
+st.write(f"損益EXP：{profit_exp}")
+st.write(f"良トレードEXP：{good_trade_exp}")
+st.write(f"無駄トレードペナルティ：{bad_trade_penalty}")
+st.write(f"振り返りEXP：{memo_exp}")
+
+st.subheader(f"今日の獲得EXP：{daily_exp}")
+
+st.write(f"攻撃力：{attack}")
+st.write(f"防御力：{defense}")
+st.write(f"知力：{intelligence}")
+st.write(f"暴走度：{chaos}")
+
+if chaos >= 30:
+    st.error("モンスターが暴走している！")
+elif daily_exp >= 30:
+    st.success("会心の一日！モンスターが大きく成長した！")
+elif daily_exp > 0:
+    st.info("モンスターは順調に育っている")
+else:
+    st.warning("今日は苦しい一日。明日立て直そう")
+
+if st.button("今日の記録を保存"):
+    data = {
+        "保存日時": [datetime.now()],
+        "日付": [record_date.strftime("%Y-%m-%d")],
+        "月": [record_date.strftime("%Y-%m")],
+        "損益%": [profit_percent],
+        "良トレード回数": [good_trades],
+        "良トレードの質": [good_quality],
+        "無駄トレード回数": [bad_trades],
+        "無駄トレードの重さ": [bad_weight],
+        "メモ": [memo],
+        "損益EXP": [profit_exp],
+        "良トレードEXP": [good_trade_exp],
+        "無駄トレードペナルティ": [bad_trade_penalty],
+        "振り返りEXP": [memo_exp],
+        "日次EXP": [daily_exp],
+        "攻撃力": [attack],
+        "防御力": [defense],
+        "知力": [intelligence],
+        "暴走度": [chaos],
+    }
+
+    df = pd.DataFrame(data)
+
+    if os.path.exists(file_name):
+        old_df = pd.read_csv(file_name)
+        df = pd.concat([old_df, df], ignore_index=True)
+
+    df.to_csv(file_name, index=False)
+    st.success("記録を保存しました！")
+
+if os.path.exists(file_name):
+
+    history = pd.read_csv(file_name)
+
+    current_month = date.today().strftime("%Y-%m")
+    month_data = history[history["月"] == current_month]
+
+    st.header("今月のモンスター")
+
+    if len(month_data) > 0:
+        month_exp, evolution, monster_type, monster_id, total_stats = calculate_limited_evolution(month_data)
+
+    else:
+        month_exp = 0
+        evolution = "タマゴ"
+        monster_type = None
+        monster_id = None
+
+        total_stats = {
+            "攻撃力": 0,
+            "防御力": 0,
+            "知力": 0,
+            "暴走度": 0,
+        }
+
+    if evolution == "タマゴ":
+        image_path = MONSTER_MASTER["egg"]["image"]
+
+    elif evolution == "幼体":
+        image_path = MONSTER_MASTER["unil"]["image"]
+
+    else:
+
+        stage_map = {
+            "成長期": "Rookie",
+            "成熟期": "Champion",
+            "完全体": "Ultimate",
+            "究極体": "Mega",
+        }
+
+        folder_stage = stage_map.get(evolution)
+
+        image_path = None
+
+        if monster_type and folder_stage:
+
+            base_path = f"assets/cards/{monster_type}/{folder_stage}"
+
+            if os.path.exists(base_path):
+
+                files = os.listdir(base_path)
+
+                target_files = [
+                    f for f in files
+                    if monster_id and monster_id in f
+                ]
+
+                if len(target_files) > 0:
+                    image_path = os.path.join(base_path, target_files[0])
+
+    if image_path and os.path.exists(image_path):
+        st.image(image_path, width=450)
+
+    else:
+        st.error("モンスター画像が見つかりません")
+
+    st.subheader(f"現在の進化：{evolution}")
+    st.write(f"月間EXP：{month_exp}") 
+    st.write("累積ステータス")
+    st.write(total_stats)
+
+    next_target = get_next_target(evolution)
+
+    if next_target is not None:
+        st.write(f"次の進化目安：{next_target} EXP")
+        st.write("※進化・退化は1回の記録につき最大1段階まで")
+
+        progress = max(0, min(month_exp / next_target, 1.0))
+        st.progress(progress)
+
+    else:
+        st.success("究極体に到達！今月の最高進化です！")
+
+    st.header("記録の修正")
+
+    if len(history) > 0:
+        latest_record = history.iloc[-1]
+
+        st.write("最後に保存した記録：")
+        st.write(f"日付：{latest_record['日付']}")
+        st.write(f"損益%：{latest_record['損益%']}")
+        st.write(f"日次EXP：{latest_record['日次EXP']}")
+
+        if st.button("最後の記録を削除する"):
+            history = history.iloc[:-1]
+            history.to_csv(file_name, index=False)
+            st.success("最後の記録を削除しました。画面を更新してください。")
+
+    st.header("月次履歴")
+
+    monthly_rows = []
+
+    for month in sorted(history["月"].unique()):
+        data = history[history["月"] == month]
+        month_exp, month_evolution, month_type, month_monster_id, month_total_stats = calculate_limited_evolution(data, save_state=False)
+
+        monthly_rows.append({
+            "月": month,
+            "損益%": data["損益%"].sum(),
+            "日次EXP合計": data["日次EXP"].sum(),
+            "制限後EXP": month_exp,
+            "最終進化": month_evolution,
+            "良トレード回数": data["良トレード回数"].sum(),
+            "無駄トレード回数": data["無駄トレード回数"].sum(),
+            "振り返りEXP": data["振り返りEXP"].sum(),
+        })
+
+    monthly_summary = pd.DataFrame(monthly_rows)
+    st.dataframe(monthly_summary)
+
+    st.header("日次記録")
+    st.dataframe(history)

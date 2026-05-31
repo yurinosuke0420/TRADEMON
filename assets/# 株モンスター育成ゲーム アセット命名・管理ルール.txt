@@ -1,0 +1,136 @@
+# 株モンスター育成ゲーム アセット命名・管理ルール
+
+## 1. フォルダ構成
+
+Assets/
+├── Cards/
+│   ├── Attacker/
+│   │   ├── Egg/
+│   │   ├── Baby/
+│   │   ├── Rookie/
+│   │   ├── Champion/
+│   │   ├── Ultimate/
+│   │   └── Mega/
+│   │
+│   ├── Tank/
+│   ├── Support/
+│   └── Technical/
+│
+├── Icons/
+│   ├── Attributes/
+│   ├── Classes/
+│   └── UI/
+│
+├── Backgrounds/
+├── Templates/
+├── UI/
+├── Effects/
+└── Lore/
+
+---
+
+## 2. カード画像の命名ルール
+
+形式：
+
+[系統]*[進化段階]*[属性]_[モンスター名].png
+
+例：
+
+ATT_MEGA_EARTH_GAIARD.png
+ATT_MEGA_WATER_OCEANUS.png
+ATT_MEGA_THUNDER_ASTRAL.png
+ATT_MEGA_FIRE_IGNIX.png
+ATT_MEGA_STEEL_METALGALD.png
+ATT_MEGA_DARK_DEMONIRAL.png
+
+---
+
+## 3. 系統コード
+
+ATT = アタッカー
+TNK = タンク
+SUP = サポート
+TEC = テクニカル
+
+---
+
+## 4. 進化段階コード
+
+EGG  = タマゴ
+BABY = 幼体
+ROOK = 成長期
+CHMP = 成熟期
+ULT  = 完全体
+MEGA = 究極体
+
+---
+
+## 5. 属性コード
+
+EARTH   = 地
+WATER   = 水
+THUNDER = 雷
+FIRE    = 炎
+STEEL   = 鋼
+DARK    = 闇
+
+---
+
+## 6. モンスターID管理（推奨）
+
+形式：
+
+MON_001
+MON_002
+MON_003
+
+例：
+
+MON_003_ATT_CHMP_EARTH_GRANDRAKE.png
+
+---
+
+## 7. 保存データ分類（推奨）
+
+Exports/
+→ ゲーム実装用画像
+
+Source/
+→ 高画質元画像
+
+PSD/
+→ 編集用データ
+
+---
+
+## 8. 現在のアタッカー系モンスター一覧
+
+### ドラゴン系
+
+ユニル
+フレイムドラ
+グランドレイク
+アビスサーペント
+スカイヴェルン
+大地竜ザグロス
+深海竜レヴィアタン
+天雷竜ヴァルゼオン
+覇岩竜ガイアード
+海皇竜オケアノス
+天帝竜アストラル
+
+---
+
+### ティラノ系
+
+ガルガノス
+インフェルノス
+アイアンザウル
+バーサゴン
+爆炎竜ブレイズレックス
+重装竜フォートザウル
+狂戦竜レイジグラウル
+炎神竜イグニクス
+鋼王竜メタルガルド
+冥界竜デモニラル
