@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime, date
+from zoneinfo import ZoneInfo
 import os
 
 st.set_page_config(
@@ -335,7 +336,7 @@ if pending_month == selected_month:
         use_container_width=True,
     ):
 
-        today_month = date.today().strftime("%Y-%m")
+        today_month = datetime.now(ZoneInfo("Asia/Tokyo")).date().strftime("%Y-%m")
 
         save_game_state(
             active_month=today_month,

@@ -392,7 +392,7 @@ def clear_evolution_state(month):
 def load_game_state():
     if not os.path.exists(game_state_file_name):
         return {
-            "active_month": date.today().strftime("%Y-%m"),
+            "active_month": datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y-%m"),
             "pending_result_month": None,
         }
 
@@ -400,7 +400,7 @@ def load_game_state():
 
     if len(state_df) == 0:
         return {
-            "active_month": date.today().strftime("%Y-%m"),
+            "active_month": datetime.now(ZoneInfo("Asia/Tokyo")).date().strftime("%Y-%m"),
             "pending_result_month": None,
         }
 
@@ -651,7 +651,7 @@ def find_monster_image(evolution, monster_type, monster_id):
 history = pd.read_csv(file_name) if os.path.exists(file_name) else pd.DataFrame()
 
 game_state = load_game_state()
-today_month = date.today().strftime("%Y-%m")
+today_month = datetime.now(ZoneInfo("Asia/Tokyo")).date().strftime("%Y-%m")
 
 current_month = game_state["active_month"]
 
@@ -797,7 +797,7 @@ with right_col:
     # container removed to avoid empty decorative boxes
     st.markdown('<div class="panel-title">📅 今日の記録</div>', unsafe_allow_html=True)
 
-    record_date = st.date_input("記録する日付", value=date.today(), label_visibility="collapsed")
+    record_date = st.date_input("記録する日付", value=datetime.now(ZoneInfo("Asia/Tokyo")).date(), label_visibility="collapsed")
 
     st.markdown('<div class="input-row">', unsafe_allow_html=True)
     st.markdown('<div class="row-title">損益（％）</div>', unsafe_allow_html=True)
