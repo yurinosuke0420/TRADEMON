@@ -3,8 +3,23 @@ import pandas as pd
 from datetime import datetime, date
 from zoneinfo import ZoneInfo
 import os
+import gspread
+from google.oauth2.service_account import Credentials
 
 from monster_master import MONSTER_MASTER
+
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets",
+]
+
+creds = Credentials.from_service_account_info(
+    st.secrets["gcp_service_account"],
+    scopes=SCOPES,
+)
+
+gc = gspread.authorize(creds)
+
+sheet = gc.open("TRADEMON_DB").worksheet("records")
 
 st.set_page_config(
     page_title="TRADEMON",
@@ -1093,3 +1108,13 @@ if os.path.exists(file_name):
                 st.success("最後の記録を削除しました。画面を更新してください。")
 else:
     st.info("まだ記録がありません。今日の記録を保存すると、モンスター育成が始まります。")
+
+st.divider()
+
+st.write("Google Sheets接続テスト")
+
+try:
+    test_value = sheet.acell("A1").value
+    st.success(f"接続成功: {test_value}")
+except Exception as e:
+    st.error(e)
