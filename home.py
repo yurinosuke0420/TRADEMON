@@ -22,6 +22,23 @@ gc = gspread.authorize(creds)
 SPREADSHEET_ID = "1oQ5PFjVQaeHAtfOoRdaUs1KUjsJmEcemrA2KX5XSUKU"
 sheet = gc.open_by_key(SPREADSHEET_ID).worksheet("records")
 
+def read_records_from_sheet():
+    values = sheet.get_all_records()
+
+    if len(values) == 0:
+        return pd.DataFrame()
+
+    return pd.DataFrame(values)
+
+
+def append_record_to_sheet(record_dict):
+    existing_values = sheet.get_all_values()
+
+    if len(existing_values) == 0:
+        sheet.append_row(list(record_dict.keys()))
+
+    sheet.append_row(list(record_dict.values()))
+
 st.set_page_config(
     page_title="TRADEMON",
     layout="wide",
@@ -664,7 +681,7 @@ def find_monster_image(evolution, monster_type, monster_id):
 # 事前に今月のモンスター情報を計算
 # ------------------------------------------------------------
 
-history = pd.read_csv(file_name) if os.path.exists(file_name) else pd.DataFrame()
+history = read_records_from_sheet()
 
 game_state = load_game_state()
 today_month = datetime.now(ZoneInfo("Asia/Tokyo")).date().strftime("%Y-%m")
@@ -950,7 +967,7 @@ with right_col:
 if save_button:
     record_month = record_date.strftime("%Y-%m")
 
-    old_history = pd.read_csv(file_name) if os.path.exists(file_name) else pd.DataFrame()
+    old_history = read_records_from_sheet()
 
     if len(old_history) > 0:
         old_month_data = old_history[old_history["月"] == record_month]
@@ -1001,8 +1018,6 @@ if save_button:
     else:
         new_history = df
 
-    new_history.to_csv(file_name, index=False)
-
     new_month_data = new_history[new_history["月"] == record_month]
 
     after_exp, after_evolution, after_type, after_monster_id, after_stats = calculate_limited_evolution(
@@ -1013,7 +1028,8 @@ if save_button:
     new_history.loc[new_history.index[-1], "進化段階"] = after_evolution
     new_history.loc[new_history.index[-1], "monster_type"] = after_type
 
-    new_history.to_csv(file_name, index=False)
+    latest_record_dict = new_history.iloc[-1].to_dict()
+    append_record_to_sheet(latest_record_dict)
 
     register_monster_to_dex(
         record_month,
@@ -1067,8 +1083,9 @@ if save_button:
 
 st.divider()
 
-if os.path.exists(file_name):
-    history = pd.read_csv(file_name)
+history = read_records_from_sheet()
+
+if len(history) > 0:
 
     hist_left, hist_right = st.columns([1, 1.55], gap="large")
 
@@ -1103,19 +1120,6 @@ if os.path.exists(file_name):
             latest_record = history.iloc[-1]
             st.write(f"最後に保存した記録：{latest_record['日付']} / 損益%：{latest_record['損益%']} / 日次EXP：{latest_record['日次EXP']}")
 
-            if st.button("最後の記録を削除する"):
-                history = history.iloc[:-1]
-                history.to_csv(file_name, index=False)
-                st.success("最後の記録を削除しました。画面を更新してください。")
+            st.caption("※Google Sheets保存化に伴い、削除機能は一時停止中です。")
 else:
     st.info("まだ記録がありません。今日の記録を保存すると、モンスター育成が始まります。")
-
-st.divider()
-
-st.write("Google Sheets接続テスト")
-
-try:
-    test_value = sheet.acell("A1").value
-    st.success(f"接続成功: {test_value}")
-except Exception as e:
-    st.error(e)
