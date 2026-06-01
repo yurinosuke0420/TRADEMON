@@ -37,7 +37,22 @@ def append_record_to_sheet(record_dict):
     if len(existing_values) == 0:
         sheet.append_row(list(record_dict.keys()))
 
-    sheet.append_row(list(record_dict.values()))
+    safe_values = []
+
+    for value in record_dict.values():
+
+        if pd.isna(value):
+            safe_values.append("")
+
+        elif isinstance(value, (datetime, date)):
+            safe_values.append(
+                value.strftime("%Y-%m-%d %H:%M:%S")
+            )
+
+        else:
+            safe_values.append(value)
+
+    sheet.append_row(safe_values)
 
 st.set_page_config(
     page_title="TRADEMON",
