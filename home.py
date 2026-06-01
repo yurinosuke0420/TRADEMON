@@ -37,7 +37,13 @@ def read_records_from_sheet():
 def append_record_to_sheet(record_dict):
     existing_values = sheet.get_all_values()
 
-    if len(existing_values) == 0:
+    sheet_is_empty = (
+        len(existing_values) == 0
+        or len(existing_values[0]) == 0
+        or all(cell == "" for cell in existing_values[0])
+    )
+
+    if sheet_is_empty:
         sheet.append_row(list(record_dict.keys()))
 
     safe_values = []
