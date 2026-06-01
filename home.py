@@ -23,12 +23,15 @@ SPREADSHEET_ID = "1oQ5PFjVQaeHAtfOoRdaUs1KUjsJmEcemrA2KX5XSUKU"
 sheet = gc.open_by_key(SPREADSHEET_ID).worksheet("records")
 
 def read_records_from_sheet():
-    values = sheet.get_all_records()
+    values = sheet.get_all_values()
 
-    if len(values) == 0:
+    if len(values) <= 1:
         return pd.DataFrame()
 
-    return pd.DataFrame(values)
+    headers = values[0]
+    rows = values[1:]
+
+    return pd.DataFrame(rows, columns=headers)
 
 
 def append_record_to_sheet(record_dict):
