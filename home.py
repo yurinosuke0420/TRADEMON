@@ -19,7 +19,8 @@ creds = Credentials.from_service_account_info(
 
 gc = gspread.authorize(creds)
 
-sheet = gc.open("TRADEMON_DB").worksheet("records")
+SPREADSHEET_ID = "1oQ5PFjVQaeHAtfOoRdaUs1KUjsJmEcemrA2KX5XSUKU"
+sheet = gc.open_by_key(SPREADSHEET_ID).worksheet("records")
 
 st.set_page_config(
     page_title="TRADEMON",
